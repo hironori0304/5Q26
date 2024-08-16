@@ -25,7 +25,7 @@ if 'shuffled_options' not in st.session_state:
     st.session_state.shuffled_options = {}
 
 # ファイルアップロード
-uploaded_file = st.file_uploader("クイズデータのCSVファイルをアップロードしてください", type="csv")
+uploaded_file = st.file_uploader("問題データのCSVファイルをアップロードしてください", type="csv")
 
 if uploaded_file is not None:
     # アップロードされたファイルを読み込む
@@ -53,6 +53,10 @@ if uploaded_file is not None:
     else:
         filtered_df = df[df['year'].isin(selected_years) & df['category'].isin(selected_categories)]
     
+    # フィルタリングされた後の問題数を表示
+    total_questions = len(filtered_df)
+    st.write(f"選択された問題は{total_questions}問あります")
+
     # 内容カテゴリーで優先的に表示するためのソート
     if not filtered_df.empty:
         filtered_df = filtered_df.sort_values(by=['category'])
@@ -153,10 +157,13 @@ if uploaded_file is not None:
             st.session_state.total_questions = total_questions
             st.session_state.percentage = (correct_count / total_questions) * 100 if total_questions > 0 else 0
             
-            st.write(f"成績: {st.session_state.score}/{st.session_state.total_questions} ({st.session_state.percentage:.2f}%)")
+            st.write(f"成績: {st.session_state.score}/{st.session_state.total_questions} 正解")
+            st.write(f"正解率: {st.session_state.percentage:.2f}%")
 
-            # 不正解問題にハイライトボタンを表示
-            if st.button('不正解問題にハイライト'):
-                for idx in st.session_state.highlighted_questions:
-                    st.markdown(f'<div style="background-color: #fdd; padding: 10px;">問題{idx}</div>', unsafe_allow_html=True)
+            # 間違えた問題をハイライトした後に結果を表示
+            if st.session_state.highlighted_questions:
+                st.write("間違えた問題がハイライトされました。")
 
+# ファイルがアップロードされていない場合のメッセージ
+else:
+    st.write("問題データのCSVファイルをアップロードしてください。")
